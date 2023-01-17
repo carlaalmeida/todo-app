@@ -158,10 +158,8 @@ body {
 
 @media (min-width: $mq-md) {
   body {
-    // &.dark {
     background-image: url("../public/images/bg-desktop-light.jpg");
     font-size: $fs-md-body;
-    // }
   }
 
   .header {
@@ -177,7 +175,14 @@ ul,
 ol {
   list-style: none;
 }
+a {
+  text-decoration: none;
+  color: $clr-primary-400;
+}
 
+a:hover {
+  color: $clr-dark-neutral-500;
+}
 input {
   border: none;
   outline: none;
@@ -198,9 +203,18 @@ button {
 
 button:hover,
 button:focus-within {
-  //  &.dark {
   color: $clr-dark-neutral-500;
-  //  }
+}
+
+footer {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  width: 100%;
+  left: 0;
+  text-align: center;
+  margin-block: $size-300;
+  position: absolute;
+  bottom: 0;
 }
 
 .flex {
@@ -232,7 +246,6 @@ button:focus-within {
 /* custom checkboxes */
 
 input[type="checkbox"] {
-  // position: absolute;
   opacity: 0;
   height: 0;
   width: 0;
@@ -352,10 +365,7 @@ input[type="checkbox"] {
 /* TodoFilter */
 .todo-footer {
   padding: $size-400;
-
-  // &.dark {
   color: $clr-light-neutral-400;
-  // }
 }
 
 .todo-filter {
@@ -369,12 +379,15 @@ input[type="checkbox"] {
 .dark {
   background-color: $clr-dark-neutral-700;
   background-image: url("../public/images/bg-mobile-dark.jpg");
-  background-size: contain;
 
   color: $clr-dark-neutral-200;
 
   button {
     color: $clr-dark-neutral-300;
+  }
+
+  a:hover, a:focus-within {
+    color: $clr-dark-neutral-100;
   }
 
   button:hover,

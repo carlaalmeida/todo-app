@@ -10,8 +10,6 @@ export function TodoList(props) {
   const [filter, setFilter] = useState("All");
 
   useEffect(() => {
-    console.log("items changed");
-
     setFilteredList(filterList(items, filter));
   }, [items, filter]);
 
