@@ -1,9 +1,6 @@
-
 const FILTERS = ["All", "Active", "Completed"];
 
-export function TodoFilter(props) {
-  const { onSelect, currentFilter } = props;
-
+export function TodoFilter({ onSelect, currentFilter }) {
   function handleFilterSelection(filter) {
     onSelect(filter);
   }

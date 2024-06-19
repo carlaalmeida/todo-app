@@ -1,0 +1,13 @@
+@import "../variables";
+
+.Input {
+  background: none;
+  margin-left: calc(-1 * $size-100);
+  display: block;
+  color: $clr-light-neutral-500;
+}
+
+// dark
+// .Input {
+//   color: $clr-dark-neutral-200;
+// }

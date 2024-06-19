@@ -1,0 +1,17 @@
+@import "../variables";
+/* CreateTodo */
+.CreateTodo {
+  background-color: #fff;
+  padding: $size-400;
+  border-radius: $border-radius;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+
+
+// dark
+// .create-todo {
+//   background-color: $clr-dark-neutral-600;
+// }

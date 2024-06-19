@@ -1,0 +1,19 @@
+@import "../variables";
+
+.ItemContent {
+  word-break: break-word;
+}
+.ItemContent:hover {
+  cursor: pointer;
+}
+
+.checked {
+  text-decoration: line-through;
+  color: $clr-light-neutral-300;
+}
+.dark {
+  // dark
+  .checked {
+    color: $clr-dark-neutral-300;
+  }
+}
