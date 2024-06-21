@@ -12,19 +12,6 @@ const todoSchema = new mongoose.Schema(
       findSorted(filter) {
         return this.find(filter).sort("index");
       },
-      // findAndDeleteMany(ids, callback) {
-      //   let deleted = [];
-      //   ids.forEach((id) => {
-      //     this.findByIdAndDelete(id, (err, result) => {
-      //       if (!err) {
-      //         console.log("result", result);
-      //         deleted.push(result);
-      //       }
-      //     });
-      //   });
-      //   console.log("schema:: deleted", deleted);
-      //   return deleted;
-      // },
     },
   }
 );

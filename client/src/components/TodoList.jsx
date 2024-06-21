@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import "./TodoList.scss";
+import { useState } from "react";
 import { Droppable } from "react-beautiful-dnd";
 import { TodoFilter } from "./TodoFilter";
 import { TodoItem } from "./TodoItem";
@@ -10,13 +11,9 @@ export function TodoList({
   onItemUpdate,
   onClearCompleted,
 }) {
-  const [filteredList, setFilteredList] = useState([]);
   const [filter, setFilter] = useState("All");
 
-  useEffect(() => {
-    console.log("[TodoList] USE EFFECT", items);
-    setFilteredList(filterList(items, filter));
-  }, [items, filter]);
+  const filteredList = filterList(items, filter);
 
   function calculateItemsLeft() {
     return filteredList.filter((i) => !i.completed).length;
@@ -24,8 +21,6 @@ export function TodoList({
 
   function handleFilterChange(newFilter) {
     setFilter(newFilter);
-    const newList = filterList(items, newFilter);
-    setFilteredList(newList);
   }
 
   function filterList(list, filter) {
@@ -53,9 +48,9 @@ export function TodoList({
     <>
       <Droppable droppableId="todo-list">
         {(provided, snapshot) => (
-          <ul className="todo-list" {...provided.props} ref={provided.innerRef}>
+          <ul className="TodoList" {...provided.props} ref={provided.innerRef}>
             {filteredList.length === 0 && (
-              <li className="todo-item">No items to display</li>
+              <li className="TodoItem">No items to display</li>
             )}
             {filteredList.map((item, index) => {
               return (

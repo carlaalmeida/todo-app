@@ -1,2 +1,22 @@
 @import "../variables";
 
+.TodoItem {
+  background-color: #fff;
+  padding: $size-400;
+  border-bottom: 1px solid $clr-light-neutral-200;
+  position: relative;
+}
+
+.TodoItem:hover {
+  cursor: grab;
+}
+
+.TodoItem-dragging {
+  border: none;
+}
+.dark {
+  .TodoItem {
+    background-color: $clr-dark-neutral-600;
+    border-bottom: 1px solid $clr-dark-neutral-300;
+  }
+}

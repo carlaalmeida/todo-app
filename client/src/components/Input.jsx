@@ -18,11 +18,11 @@ export default function Input({ onSubmit }) {
   };
   return (
     <input
+      className="Input"
       type="text"
       value={value}
       onChange={handleChange}
       onKeyDown={handleKeyDown}
-      className="Input"
       placeholder="Create a new todo..."
     />
   );

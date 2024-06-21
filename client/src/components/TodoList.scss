@@ -1,0 +1,11 @@
+@import "../variables";
+
+/* TodoList */
+.TodoList {
+  background-color: #fff;
+  border-radius: $border-radius;
+}
+
+.dark .TodoList {
+  background-color: $clr-dark-neutral-600;
+}

@@ -1,6 +1,5 @@
 import Checkbox from "./Checkbox";
 import "./CreateTodo.scss";
-import { useState } from "react";
 import Input from "./Input";
 
 export function CreateTodo({ onSubmit }) {

@@ -6,31 +6,23 @@ import { ThemeSwitcher } from "./components/ThemeSwitcher";
 import { TodoList } from "./components/TodoList";
 import axios from "axios";
 
+const findChanges = (oldArr, newArr) => {
+  const changed = [];
+  for (let i = 0; i < newArr.length; i++) {
+    if (oldArr[i].index !== newArr[i].index) {
+      changed.push(newArr[i]);
+    }
+  }
+  return changed;
+};
+
 function App() {
-  // const initialItems = [
-  //   { _id: "item-1", checked: true, text: "Complete online JavaScript course" },
-  //   { _id: "todo-2", checked: false, text: "Jog around the park 3x" },
-  //   { _id: "todo-3", checked: false, text: "10 minutes meditation" },
-  //   { _id: "todo-4", checked: false, text: "Read for 1 hour" },
-  //   { _id: "todo-5", checked: false, text: "Pick up groceries" },
-  //   {
-  //     _id: "todo-6",
-  //     checked: false,
-  //     text: "Complete Todo App on Frontend Mentor",
-  //   },
-  // ];
-  const API_URL = "http://localhost:5000"; // Mudar isto para IP atual da API
+  const API_URL = process.env.REACT_APP_API_SERVER;
 
   const [mode, setMode] = useState(null);
 
   const [items, setItems] = useState([]);
   const [prevItems, setPrevItems] = useState(null);
-
-  // save previous items state
-  useEffect(() => {
-    // console.log("USE EFFECT PREVITEMS", prevItems);
-    setPrevItems(items);
-  }, [items]);
 
   // run on load to get the stored theme & todos
   useEffect(() => {
@@ -53,10 +45,19 @@ function App() {
     }
   }, []);
 
+  // save previous items state in case of error
+  useEffect(() => {
+    setPrevItems(items);
+  }, [items]);
+
   // fetches todos from the server
   async function fetchTodos() {
-    const response = await axios.get(`${API_URL}/todos`);
-    setItems(response.data);
+    try {
+      const response = await axios.get(`${API_URL}/todos`);
+      setItems(response.data);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   function handleChangeMode() {
@@ -72,22 +73,26 @@ function App() {
 
   async function handleCreateTodo(todoContent) {
     try {
-      const newTodo = await axios.post(`${API_URL}/todos`, {
+      const { data: newTodo } = await axios.post(`${API_URL}/todos`, {
         content: todoContent,
         index: items.length,
       });
-      console.log("item created!", newTodo);
-      setItems((oldItems) => [...oldItems, newTodo.data]);
-    } catch (err) {
-      console.error("Unable to create new todo");
-      throw new Error(err.message);
+      if (newTodo.error) {
+        throw new Error(newTodo.error);
+      }
+      setItems((oldItems) => [...oldItems, newTodo]);
+    } catch (error) {
+      console.error(error);
     }
   }
 
   async function handleItemDelete(itemId) {
     try {
-      await axios.delete(`${API_URL}/todos/${itemId}`).data;
-      setItems((oldItems) => oldItems.filter((i) => i._id !== itemId));
+      const { data } = await axios.delete(`${API_URL}/todos/${itemId}`);
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      setItems(data);
     } catch (error) {
       console.error(error);
     }
@@ -101,6 +106,9 @@ function App() {
           completed: checked,
         }
       );
+      if (updatedItem.error) {
+        throw new Error(updatedItem.error);
+      }
 
       setItems((oldItems) =>
         oldItems.map((item) => {
@@ -118,37 +126,21 @@ function App() {
       const idsToDelete = items
         .filter((item) => item.completed)
         .map((item) => item._id);
-      console.log("ids to delete: ", idsToDelete);
-      await axios.delete(`${API_URL}/todos/`, { data: { ids: idsToDelete } });
-
-      setItems((oldItems) =>
-        oldItems.filter((i) => !idsToDelete.includes(i._id))
-      );
+      const { data: newItems } = await axios.delete(`${API_URL}/todos/`, {
+        data: { ids: idsToDelete },
+      });
+      if (newItems.error) {
+        throw new Error(newItems.error);
+      }
+      setItems(newItems);
     } catch (error) {
       console.error(error);
     }
   }
 
   async function handleDropEnd(result) {
-    // old version
-    /*const { destination, source } = result;
-
-    if (!destination) return;
-    if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
-    )
-      return;
-
-    const newItems = Array.from(items);
-    newItems.splice(source.index, 1);
-    newItems.splice(destination.index, 0, items[source.index]);
-
-    setItems(newItems);
-    */
-
     const { destination, source } = result;
-    console.log("[handleDropEnd] result: ", result);
+
     if (!destination) return;
     if (
       destination.droppableId === source.droppableId &&
@@ -161,29 +153,34 @@ function App() {
     newItems.splice(destination.index, 0, items[source.index]); // na posição destination.index adicionar o items[source.index]
 
     setItems(newItems);
-    console.log("[handleDropEnd] newItems: ", newItems);
-    //este array não devia conter todos os todos; só aqueles que são afetados pelo drag e drop e respetivos novos indices
 
     const startIndex = Math.min(source.index, destination.index);
     const endIndex = Math.max(source.index, destination.index);
-    // const data = newItems.slice(startIndex, endIndex + 1);
 
-    // await updateIndexes(start, end, data)
-    const data = [];
-
+    const itemsToUpdate = [];
     for (let i = startIndex; i <= endIndex; i++) {
-      console.log(newItems[i]);
-      data.push({
+      itemsToUpdate.push({
         id: newItems[i]._id,
         index: i,
-        // content: newItems[i].content,
       });
     }
 
-    console.log("[handleDropEnd] data: ", data);
-    // console.log("[handleDropEnd] antes do axios, items: ", items);
     try {
-      await axios.patch(`${API_URL}/todos/`, { data });
+      await axios.patch(`${API_URL}/todos/`, { data: itemsToUpdate });
+    } catch (error) {
+      if (prevItems !== null) {
+        setItems(prevItems);
+      }
+    }
+  }
+
+  async function handleListReorder(newOrder) {
+    const updates = findChanges(newOrder, [...items]);
+    try {
+      const newItems = await axios.patch(`${API_URL}/todos/`, {
+        data: updates,
+      });
+      if (newItems.data) setItems(newItems.data);
     } catch (error) {
       if (prevItems !== null) {
         setItems(prevItems);
@@ -205,6 +202,7 @@ function App() {
             onItemDelete={handleItemDelete}
             onItemUpdate={handleItemUpdate}
             onClearCompleted={handleClearCompleted}
+            onReorder={handleListReorder}
           />
         </main>
         <footer>

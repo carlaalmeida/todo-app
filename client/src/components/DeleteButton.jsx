@@ -1,7 +1,9 @@
+import "./DeleteButton.scss";
+
 export default function DeleteButton({ onDelete }) {
   return (
     <button
-      className="button button-delete todo-item-action sm-only justify-self-end"
+      className="DeleteButton button todo-item-action sm-only"
       type="button"
       onClick={onDelete}
     >

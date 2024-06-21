@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 
@@ -11,164 +12,144 @@ app.use(cors());
 app.use(express.json());
 
 mongoose.set("strictQuery", true);
-mongoose.connect("mongodb://localhost:27017/todoDB");
+mongoose.connect(process.env.DB_ATLAS);
 
 app.get("/", (req, res) => {
-  console.log("tenho de fazer redirect...");
   res.redirect("/todos");
 });
 
-app.get("/todos", (req, res) => {
-  Todo.findSorted({})
-    .then((todos) => {
-      console.log("tenho todos para enviar...");
-      console.dir(todos);
-      res.json(todos);
-    })
-    .catch((err) => {
-      console.error(err);
-      res.json(err);
-    });
-
+app.get("/todos", async (req, res) => {
+  try {
+    const todos = await Todo.findSorted({});
+    res.json(todos);
+  } catch (err) {
+    console.error(err);
+    res.json(err);
+  }
 });
 
-app.get("/todos/:id", (req, res) => {
-  const id = req.params.id;
+app.get("/todos/:id", async (req, res) => {
+  const { id } = req.params;
 
-  Todo.findById(id)
-    .then((todo) => res.json(todo))
-    .catch((err) => {
-      res.json(err);
-    });
- 
+  try {
+    const todo = await Todo.findById(id);
+    res.json(todo);
+  } catch (err) {
+    console.error(err);
+    res.json({ error: `Error getting todo with id: ${id}` });
+  }
 });
 
 // save a new todo
-app.post("/todos", (req, res) => {
-  const content = req.body.content;
-  const index = req.body.index || -1;
-
-  Todo.create({
-    content: content,
-    completed: false,
-    index: index,
-  })
-    .then((todo) => res.json(todo))
-    .catch((err) => {
-      res.json(err);
-    });
-
- 
+app.post("/todos", async (req, res) => {
+  const { content, index = -1 } = req.body;
+  try {
+    const newTodo = await Todo.create({ completed: false, content, index });
+    res.json(newTodo);
+  } catch (err) {
+    console.error(err);
+    res.json({ error: `Error creating new todo.` });
+  }
 });
 
 // update a todo's status
-app.patch("/todos/:id", (req, res) => {
-  const id = req.params.id;
-  const completed = req.body.completed;
+app.patch("/todos/:id", async (req, res) => {
+  const { completed } = req.body;
+  const { id } = req.params;
 
-  Todo.findOneAndUpdate(
-    { _id: id },
-    { completed: completed },
-    { returnOriginal: false }
-  )
-    .then((todo) => res.json(todo))
-    .catch((err) => {
-      console.error(err);
-      res.json({ error: err });
-    });
-
- 
+  try {
+    const todo = await Todo.findOneAndUpdate(
+      { _id: id },
+      { completed },
+      { returnOriginal: false }
+    );
+    res.json(todo);
+  } catch (err) {
+    console.error(err);
+    res.json({ error: `Error updating todo with id: ${id}.` });
+  }
 });
 
 // updates the index of given todos
-app.patch("/todos", (req, res) => {
-  const { data } = req.body;
-  console.log(data);
+app.patch("/todos", async (req, res) => {
+  const { data: items } = req.body;
   // create a "promise" for each item to be updated
-  const updates = data.map((item) =>
+  const updates = items.map((item) =>
     Todo.findByIdAndUpdate(item.id, { index: item.index })
   );
 
-  Promise.all(updates)
-    .then(() => Todo.findSorted({}))
-    .then((todos) => res.json(todos))
-    .catch((err) => {
-      console.error(err);
-      res.json({ error: err });
-    });
- 
+  try {
+    await Promise.all(updates);
+    res.json(await Todo.findSorted({}));
+  } catch (err) {
+    console.error(err);
+    res.json({ error: `Error updating todos with ids: ${items}.` });
+  }
 });
 
 // deletes an item and returns collection (without the removed item)
 // updates next items indexes
-app.delete("/todos/:id", (req, res) => {
-  const idToDelete = req.params.id;
-
-  Todo.findByIdAndDelete(idToDelete) // delete the item
-    // Todo.findById(idToDelete)
-    .then((deleted) => {
-      // get all the items that have a greater index
-      return Todo.findSorted({ index: { $gt: deleted.index } });
-    })
-    .then((todosToUpdate) => {
-      // update their index
-      const promises = todosToUpdate.map((todo) =>
-        Todo.findByIdAndUpdate(todo._id, { $inc: { index: -1 } })
-      );
-      console.log("finished building updates");
-      console.log(promises);
-      return Promise.all(promises);
-    })
-    .then(() => {
-      // get the all the todos
-      return Todo.findSorted({});
-    })
-    .then((todos) => res.json(todos))
-    .catch((err) => {
-      console.error(err);
-      res.json({ error: err });
+app.delete("/todos/:id", async (req, res) => {
+  const { id: idToDelete } = req.params;
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const deleted = await Todo.findByIdAndDelete(idToDelete, {
+      session,
     });
+    await Todo.updateMany(
+      { index: { $gt: deleted.index } },
+      { $inc: { $index: -1 } },
+      { session }
+    );
 
+    await session.commitTransaction();
+    res.json(await Todo.findSorted({}));
+  } catch (err) {
+    console.error(err);
+    await session.abortTransaction();
+    res.json({ error: `Error deleting todo with id: ${idToDelete}.` });
+  } finally {
+    session.endSession();
+  }
 });
 
 //deletes items with the ids specified in array [id1, id2, ...]
-app.delete("/todos/", (req, res) => {
-  if (req.body.ids) {
-    const idsToDelete = req.body.ids;
+app.delete("/todos/", async (req, res) => {
+  const { ids: idsToDelete } = req.body;
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    // get the items to delete
+    const itemsToDelete = await Todo.find({
+      _id: { $in: idsToDelete },
+    }).session(session);
 
-    const deletes = idsToDelete.map((id) => Todo.findByIdAndDelete(id));
+    if (itemsToDelete.length === 0) {
+      res.json({ error: "No items to delete." });
+    }
 
-    Promise.all(deletes)
-      .then((deletedTodos) => {
-        const todosToUpdate = deletedTodos.map((deleted) =>
-          Todo.findSorted({
-            _id: { $nin: idsToDelete }, // ignoring removed todos
-            index: { $gt: deleted.index },
-          })
-        );
-        return Promise.all(todosToUpdate);
-      })
-      .then((result) => {
-        // using flat() to flatten the results array before building the queries
-        const updates = result
-          .flat()
-          .map((todo) =>
-            Todo.findByIdAndUpdate(todo._id, { $inc: { index: -1 } })
-          );
-        return Promise.all(updates);
-      })
-      .then((result) => {
-        return Todo.findSorted({});
-      })
-      .then((todos) => {
-        return res.json(todos);
-      })
-      .catch((err) => {
-        console.error(err);
-        res.json({ error: err });
-      });
+    // delete the items
+    await Todo.deleteMany({ _id: { $in: idsToDelete } }, { session: session });
 
-   
+    // get the lowest index of the deleted items
+    const firstIndex = Math.min(...itemsToDelete.map((item) => item.index));
+    // update items that have a greater index greater that the first deleted item
+    await Todo.updateMany(
+      {
+        index: { $gt: firstIndex },
+        _id: { $nin: idsToDelete },
+      },
+      { $inc: { index: -1 } },
+      { session: session }
+    );
+    await session.commitTransaction();
+
+    res.json(await Todo.findSorted({}));
+  } catch (err) {
+    await session.abortTransaction();
+    console.error(err);
+    res.json({ error: `Error deleting todos with ids: ${idsToDelete}` });
   }
 });
 
