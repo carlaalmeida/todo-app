@@ -1,4 +1,3 @@
-require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 
@@ -12,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 mongoose.set("strictQuery", true);
-mongoose.connect(process.env.DB_ATLAS);
+mongoose.connect("mongodb://localhost:27017/todoDB?replicaSet=rs0");
 
 app.get("/", (req, res) => {
   res.redirect("/todos");

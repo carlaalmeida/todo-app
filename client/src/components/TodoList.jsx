@@ -4,9 +4,11 @@ import { Droppable } from "react-beautiful-dnd";
 import { TodoFilter } from "./TodoFilter";
 import { TodoItem } from "./TodoItem";
 import { TodoListFooter } from "./TodoListFooter";
+// import ListSkeleton from "./ListSkeleton";
 
 export function TodoList({
   items,
+  isLoading,
   onItemDelete,
   onItemUpdate,
   onClearCompleted,
@@ -49,7 +51,8 @@ export function TodoList({
       <Droppable droppableId="todo-list">
         {(provided, snapshot) => (
           <ul className="TodoList" {...provided.props} ref={provided.innerRef}>
-            {filteredList.length === 0 && (
+            {/* {isLoading && <ListSkeleton />} */}
+            {!isLoading && filteredList.length === 0 && (
               <li className="TodoItem">No items to display</li>
             )}
             {filteredList.map((item, index) => {
@@ -62,6 +65,7 @@ export function TodoList({
                   onChange={updateItemStatus}
                   onDelete={deleteItem}
                   index={index}
+                  isDraggable={filter === "All"}
                 />
               );
             })}

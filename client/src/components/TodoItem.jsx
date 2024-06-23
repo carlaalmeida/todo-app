@@ -7,7 +7,7 @@ import ItemContent from "./ItemContent";
 
 export function TodoItem(props) {
   const [checked, setChecked] = useState(props.checked);
-  const { id, index, text, onChange, onDelete } = props;
+  const { id, index, text, isDraggable, onChange, onDelete } = props;
 
   const updateItem = (value) => {
     setChecked(value);
@@ -27,7 +27,7 @@ export function TodoItem(props) {
   };
 
   return (
-    <Draggable draggableId={id} index={index}>
+    <Draggable draggableId={id} index={index} isDragDisabled={!isDraggable}>
       {(provided, snapshot) => (
         <form
           className={getClassName(snapshot.isDragging)}

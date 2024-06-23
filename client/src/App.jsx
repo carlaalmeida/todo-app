@@ -24,9 +24,10 @@ function App() {
   const [items, setItems] = useState([]);
   const [prevItems, setPrevItems] = useState(null);
 
+  const [isLoading, setIsLoading] = useState(true);
+
   // run on load to get the stored theme & todos
   useEffect(() => {
-    fetchTodos();
     const storedMode = localStorage.getItem("mode");
     if (storedMode) {
       setMode(storedMode);
@@ -43,6 +44,7 @@ function App() {
     } else {
       setMode("light");
     }
+    fetchTodos();
   }, []);
 
   // save previous items state in case of error
@@ -55,6 +57,7 @@ function App() {
     try {
       const response = await axios.get(`${API_URL}/todos`);
       setItems(response.data);
+      setIsLoading(false);
     } catch (error) {
       console.error(error);
     }
@@ -189,7 +192,7 @@ function App() {
   }
 
   return (
-    <DragDropContext onDragEnd={handleDropEnd}>
+    <DragDropContext onDragEnd={handleDropEnd} >
       <div className="flex-container">
         <header className="header flex justify-space-between">
           <h1 className="heading-1">Todo</h1>
@@ -197,8 +200,10 @@ function App() {
         </header>
         <main>
           <CreateTodo onSubmit={handleCreateTodo} />
+
           <TodoList
             items={items}
+            isLoading={isLoading}
             onItemDelete={handleItemDelete}
             onItemUpdate={handleItemUpdate}
             onClearCompleted={handleClearCompleted}
