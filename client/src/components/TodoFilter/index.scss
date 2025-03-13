@@ -1,0 +1,15 @@
+@use "../../scss/variables" as *;
+
+.todo-filter {
+  padding: $size-400;
+  gap: $size-200;
+  display: flex;
+  justify-content: center;
+  background-color: var(--background-list);
+  border-radius: $border-radius;
+  font-weight: $fw-semi-bold;
+
+  @media (min-width: $mq-md) {
+    padding: 0;
+  }
+}

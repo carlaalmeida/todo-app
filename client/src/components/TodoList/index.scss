@@ -1,0 +1,21 @@
+@use "../../scss/variables" as *;
+
+.todo-list {
+  &__empty-message {
+    background-color: var(--background-list);
+    padding: $size-400;
+    border-top-left-radius: $border-radius;
+    border-top-right-radius: $border-radius;
+  }
+
+  &__items {
+    border-radius: $border-radius;
+    background-color: var(--background-list);
+  }
+  &__instructions {
+    text-align: center;
+    color: var(--button-text);
+    font-size: $fs-sm-body;
+    margin-block: 2rem;
+  }
+}

@@ -1,0 +1,9 @@
+@use "../../scss/variables" as *;
+
+.footer {
+  font-size: $fs-footer;
+  opacity: 0.8;
+  width: 100%;
+  text-align: center;
+  margin-block: auto $size-300;
+}

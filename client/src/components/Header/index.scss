@@ -1,0 +1,20 @@
+@use "../../scss/variables" as *;
+.header {
+  padding-block: 2rem;
+  display: flex;
+  justify-content: space-between;
+
+  &__title {
+    text-transform: uppercase;
+    font-size: $fs-sm-heading;
+    font-weight: $fw-bold;
+    letter-spacing: $size-100;
+    color: #fff;
+  }
+}
+
+@media (min-width: $mq-md) {
+  .header {
+    padding-top: $size-900;
+  }
+}
