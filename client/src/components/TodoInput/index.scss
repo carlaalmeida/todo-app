@@ -1,0 +1,8 @@
+@use "../../scss/variables" as *;
+
+.todo-input {
+  background: none;
+  margin-left: calc(-1 * $size-100);
+  display: block;
+  color: var(--text-color);
+}

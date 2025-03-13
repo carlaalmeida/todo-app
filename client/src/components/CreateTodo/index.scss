@@ -1,0 +1,10 @@
+@use "../../scss/variables" as *;
+
+.create-todo {
+  padding: $size-400;
+  border-radius: $border-radius;
+  position: relative;
+  display: flex;
+  align-items: center;
+  background-color: var(--background-list);
+}

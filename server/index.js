@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 
@@ -11,7 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 mongoose.set("strictQuery", true);
-mongoose.connect("mongodb://localhost:27017/todoDB?replicaSet=rs0");
+mongoose.connect(process.env.DB_ATLAS);
 
 app.get("/", (req, res) => {
   res.redirect("/todos");
@@ -79,6 +80,8 @@ app.patch("/todos", async (req, res) => {
 
   try {
     await Promise.all(updates);
+    // console.log("updated indexes");
+    // console.log(items);
     res.json(await Todo.findSorted({}));
   } catch (err) {
     console.error(err);
@@ -102,14 +105,16 @@ app.delete("/todos/:id", async (req, res) => {
       { session }
     );
 
+    const updatedTodos = await Todo.findSorted({}).session(session);
+
     await session.commitTransaction();
-    res.json(await Todo.findSorted({}));
+    res.json(updatedTodos);
   } catch (err) {
     console.error(err);
     await session.abortTransaction();
     res.json({ error: `Error deleting todo with id: ${idToDelete}.` });
   } finally {
-    session.endSession();
+    await session.endSession();
   }
 });
 
@@ -117,14 +122,15 @@ app.delete("/todos/:id", async (req, res) => {
 app.delete("/todos/", async (req, res) => {
   const { ids: idsToDelete } = req.body;
   const session = await mongoose.startSession();
-  session.startTransaction();
   try {
+    session.startTransaction();
     // get the items to delete
     const itemsToDelete = await Todo.find({
       _id: { $in: idsToDelete },
     }).session(session);
 
     if (itemsToDelete.length === 0) {
+      await session.abortTransaction();
       res.json({ error: "No items to delete." });
     }
 
@@ -133,7 +139,8 @@ app.delete("/todos/", async (req, res) => {
 
     // get the lowest index of the deleted items
     const firstIndex = Math.min(...itemsToDelete.map((item) => item.index));
-    // update items that have a greater index greater that the first deleted item
+
+    // update items that have an index greater than the first deleted item
     await Todo.updateMany(
       {
         index: { $gt: firstIndex },
@@ -142,13 +149,19 @@ app.delete("/todos/", async (req, res) => {
       { $inc: { index: -1 } },
       { session: session }
     );
-    await session.commitTransaction();
 
-    res.json(await Todo.findSorted({}));
+    const updatedTodos = await Todo.findSorted({}).session(session);
+    await session.commitTransaction();
+    res.json(updatedTodos);
   } catch (err) {
-    await session.abortTransaction();
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
+
     console.error(err);
     res.json({ error: `Error deleting todos with ids: ${idsToDelete}` });
+  } finally {
+    await session.endSession();
   }
 });
 

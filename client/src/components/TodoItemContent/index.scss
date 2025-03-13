@@ -1,0 +1,14 @@
+@use "../../scss/variables" as *;
+
+.todo-item-content {
+  word-break: break-word;
+  align-self: center;
+
+  &:hover {
+    cursor: pointer;
+  }
+  &--checked {
+    text-decoration: line-through;
+    color: var(--checked-color);
+  }
+}

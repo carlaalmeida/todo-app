@@ -1,86 +1,41 @@
-@import url("https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;700&display=swap");
-@import "variables";
-
-/* CSS Reset https://piccalil.li/blog/a-modern-css-reset/ */
-
-/* Box sizing rules */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  padding: 0;
-  font-size: inherit;
-}
-
-/* Remove default margin */
-body,
-h1,
-h2,
-h3,
-h4,
-p,
-figure,
-blockquote,
-dl,
-dd {
-  margin: 0;
-}
-
-/* Remove list styles on ul, ol elements with a list role, which suggests default styling will be removed */
-ul[role="list"],
-ol[role="list"] {
-  list-style: none;
-}
-
-/* Set core root defaults */
-html:focus-within {
-  scroll-behavior: smooth;
-}
-
-/* Set core body defaults */
-body {
-  min-height: 100vh;
-  text-rendering: optimizeSpeed;
-  line-height: 1.5;
-}
-
-/* A elements that don't have a class get default styles */
-a:not([class]) {
-  text-decoration-skip-ink: auto;
-}
-
-/* Make images easier to work with */
-img,
-picture {
-  max-width: 100%;
-  display: block;
-}
-
-/* Inherit fonts for inputs and buttons */
-input,
-button,
-textarea,
-select {
-  font: inherit;
-}
-
-/* Remove all animations, transitions and smooth scroll for people that prefer not to see them */
-@media (prefers-reduced-motion: reduce) {
-  html:focus-within {
-    scroll-behavior: auto;
-  }
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
+@use "./scss/variables" as *;
+@use "./scss/reset" as *;
+@import url("https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600;700&display=swap");
 
 /* General styling */
+
+:root {
+  --checkbox-border: hsl(235, 19%, 35%);
+  --color-primary: hsl(220, 98%, 61%);
+  --linear-gradient: linear-gradient(
+    150deg,
+    hsl(192, 100%, 67%),
+    hsl(280, 87%, 65%)
+  );
+  --button-text: hsl(236, 9%, 61%);
+
+  &.app--light {
+    --background-color: hsl(236, 33%, 92%);
+    --text-color: hsl(237, 14%, 26%);
+    --background-mobile: url("/images/bg-mobile-light.jpg");
+    --background-desktop: url("/images/bg-desktop-light.jpg");
+    --background-list: hsl(0, 0%, 98%);
+    --hover-color: hsl(235, 19%, 35%);
+    --border-color: hsl(234, 39%, 85%);
+    --checked-color: hsl(233, 11%, 84%);
+  }
+
+  &.app--dark {
+    --background-color: hsl(235, 21%, 11%);
+    --text-color: hsl(234, 39%, 85%);
+    --background-mobile: url("/images/bg-mobile-dark.jpg");
+    --background-desktop: url("/images/bg-desktop-dark.jpg");
+    --background-list: hsl(235, 24%, 19%);
+    --hover-color: hsl(236, 33%, 92%);
+    --border-color: hsl(234, 11%, 52%);
+    --checked-color: hsl(234, 11%, 52%);
+  }
+}
 
 body {
   font-family: $font-family;
@@ -91,37 +46,19 @@ body {
 
   line-height: 1;
 
-  background-color: $clr-light-neutral-200;
-  background-image: url("../public/images/bg-mobile-light.jpg");
+  background-color: var(--background-color);
+  background-image: var(--background-mobile);
+
   background-size: contain;
 
-  color: $clr-dark-neutral-500;
-}
-
-.header {
-  padding-block: 2rem;
-}
-
-.heading-1 {
-  text-transform: uppercase;
-  font-size: $fs-sm-heading;
-  font-weight: $fw-bold;
-  letter-spacing: $size-100;
-  color: #fff;
+  color: var(--text-color);
 }
 
 @media (min-width: $mq-md) {
   body {
-    background-image: url("../public/images/bg-desktop-light.jpg");
+    background-image: var(--background-desktop);
+
     font-size: $fs-md-body;
-  }
-
-  .header {
-    padding-top: $size-900;
-  }
-
-  .heading-1 {
-    font-size: $fs-md-heading;
   }
 }
 
@@ -131,12 +68,9 @@ ol {
 }
 a {
   text-decoration: none;
-  color: $clr-primary-400;
+  color: var(--color-primary);
 }
 
-a:hover {
-  color: $clr-dark-neutral-500;
-}
 input {
   border: none;
   outline: none;
@@ -148,24 +82,13 @@ input[type="text"] {
 }
 
 button {
-  background: none;
-  border: none;
   cursor: pointer;
-
-  color: $clr-light-neutral-400;
 }
 
+a:hover,
 button:hover,
 button:focus-within {
-  color: $clr-dark-neutral-500;
-}
-
-footer {
-  font-size: 0.8rem;
-  opacity: 0.8;
-  width: 100%;
-  text-align: center;
-  margin-block: auto $size-300;
+  color: var(--hover-color);
 }
 
 .flex {
@@ -187,11 +110,21 @@ footer {
 
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100svh;
 }
 
 .md-up {
   display: none;
+}
+
+.button-link {
+  background: none;
+  border: none;
+  color: var(--button-text);
+
+  &--active {
+    color: var(--color-primary);
+  }
 }
 
 /* medium screens and up) */
@@ -205,54 +138,5 @@ footer {
   }
   .flex-container {
     max-width: 50ch;
-  }
-}
-
-/* TodoFilter */
-.todo-footer {
-  padding: $size-400;
-  color: $clr-light-neutral-400;
-}
-
-.todo-filter {
-  gap: $size-200;
-}
-
-.todo-button-link-active {
-  color: $clr-primary-400;
-}
-
-.dark {
-  background-color: $clr-dark-neutral-700;
-  background-image: url("../public/images/bg-mobile-dark.jpg");
-
-  color: $clr-dark-neutral-200;
-
-  button {
-    color: $clr-dark-neutral-300;
-  }
-
-  a:hover,
-  a:focus-within {
-    color: $clr-dark-neutral-100;
-  }
-
-  button:hover,
-  button:focus-within {
-    color: $clr-dark-neutral-100;
-  }
-
-  .todo-footer {
-    color: $clr-dark-neutral-300;
-  }
-
-  .todo-button-link-active {
-    color: $clr-primary-400;
-  }
-}
-
-@media (min-width: $mq-md) {
-  .dark {
-    background-image: url("../public/images/bg-desktop-dark.jpg");
   }
 }

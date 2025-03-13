@@ -1,0 +1,21 @@
+@use "../../scss/variables" as *;
+
+.todo-delete-button {
+  padding-left: $size-300;
+  min-width: 18px;
+  min-height: 18px;
+  margin-left: auto;
+  flex-shrink: 0;
+  background: none;
+  border: 0;
+}
+
+@media (min-width: $mq-md) {
+  .todo-delete-button {
+    padding-left: $size-600;
+  }
+
+  .todo-item:hover .todo-delete-button {
+    display: block;
+  }
+}
