@@ -1,6 +1,6 @@
 @use "../../scss/variables" as *;
 .header {
-  padding-block: 2rem;
+  padding-block: $size-800;
   display: flex;
   justify-content: space-between;
 

@@ -3,7 +3,6 @@ import MoonIcon from "/images/icon-moon.svg";
 import SunIcon from "/images/icon-sun.svg";
 
 export function ThemeSwitcher({ theme, onChange }) {
-  console.log("theme switcher", theme);
   const icon = <img src={theme === "light" ? MoonIcon : SunIcon} />;
   return (
     <button

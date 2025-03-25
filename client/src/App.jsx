@@ -19,7 +19,6 @@ export default function App() {
     return storedTheme || "light";
   });
 
-
   useEffect(() => {
     document.documentElement.className = `app--${theme}`;
     localStorage.setItem("todo-app.theme", theme);
@@ -36,7 +35,9 @@ export default function App() {
         <Header>
           <ThemeSwitcher theme={theme} onChange={handleChangeTheme} />
         </Header>
-        <AppContent />
+        <main>
+          <AppContent />
+        </main>
         <Footer />
       </div>
     </QueryClientProvider>

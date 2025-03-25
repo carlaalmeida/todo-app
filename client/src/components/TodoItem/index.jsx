@@ -29,7 +29,6 @@ export default function TodoItem({
     }
   };
 
-  // todo usar https://www.npmjs.com/package/clsx
   const getClassName = (isDragging) => {
     return isDragging ? "todo-item todo-item--dragging" : "todo-item";
   };

@@ -9,26 +9,33 @@ export async function fetchTodos() {
 
     return response.data;
   } catch (error) {
-    console.error(error);
-    // todo
-    throw new Error("Failed to fetch data");
+    console.log(error);
+    throw {
+      message: "Failed to fetch todos",
+      status: error.status,
+      code: error.code,
+    };
   }
 }
 
 // creates new todo at given index
 export async function createTodo(content, index = -1) {
   try {
-    const { data: newTodo } = await axios.post(`${API_URL}/todos`, {
+    const { data: newTodo, error } = await axios.post(`${API_URL}/todos`, {
       content,
       index,
     });
-    if (newTodo.error) {
-      throw new Error(newTodo.error);
+    if (error) {
+      throw new Error(error);
     }
     return newTodo;
   } catch (error) {
-    // todo
     console.error(error);
+    throw {
+      message: "Failed to create todo",
+      status: error.status,
+      code: error.code,
+    };
   }
 }
 
@@ -40,8 +47,12 @@ export async function deleteTodo(itemId) {
       throw new Error(data.error);
     }
   } catch (error) {
-    // todo
     console.error(error);
+    throw {
+      message: "Failed to delete item",
+      status: error.status,
+      code: error.code,
+    };
   }
 }
 
@@ -56,8 +67,12 @@ export async function updateTodo(id, completed) {
     }
     return updatedItem;
   } catch (error) {
-    // todo
     console.error(error);
+    throw {
+      message: "Failed to update status",
+      status: error.status,
+      code: error.code,
+    };
   }
 }
 
@@ -66,13 +81,22 @@ export async function updateTodos(data) {
   try {
     return await axios.patch(`${API_URL}/todos/`, { data });
   } catch (error) {
-    // todo
     console.error(error);
+    throw {
+      message: "Failed to reorder list",
+      status: error.status,
+      code: error.code,
+    };
   }
 }
 
 // deletes all the todos with the given ids
 export async function deleteTodos(idsToDelete) {
+  
+  if (idsToDelete.length === 0)
+    throw {
+      message: "Nothing to delete",
+    };
   try {
     const { data: newItems } = await axios.delete(`${API_URL}/todos/`, {
       data: { ids: idsToDelete },
@@ -82,7 +106,11 @@ export async function deleteTodos(idsToDelete) {
     }
     return newItems;
   } catch (error) {
-    // todo
     console.error(error);
+    throw {
+      message: "Failed to delete completed todos",
+      status: error.status,
+      code: error.code,
+    };
   }
 }

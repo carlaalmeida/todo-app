@@ -13,6 +13,7 @@
     hsl(280, 87%, 65%)
   );
   --button-text: hsl(236, 9%, 61%);
+  --box-shadow: 0 5px 20px 0 rgba(0, 0, 0, 0.2);
 
   &.app--light {
     --background-color: hsl(236, 33%, 92%);
@@ -52,10 +53,8 @@ body {
   background-size: contain;
 
   color: var(--text-color);
-}
 
-@media (min-width: $mq-md) {
-  body {
+  @media (min-width: $mq-md) {
     background-image: var(--background-desktop);
 
     font-size: $fs-md-body;

@@ -1,0 +1,40 @@
+@use "../../scss/variables" as *;
+
+.error {
+  text-align: center;
+
+  background-color: var(--background-list);
+  padding: $size-300;
+  border-radius: $border-radius;
+  margin-top: $size-800;
+
+  &__header {
+    display: flex;
+    justify-content: center;
+    @media (min-width: $mq-md) {
+      align-items: center;
+      gap: $size-100;
+    }
+  }
+
+  &__icon {
+    background: var(--color-primary) !important;
+    flex-shrink: 0;
+    &::after,
+    &::before {
+      background: var(--background-list) !important;
+    }
+  }
+
+  &__title {
+    font-size: $fs-md-body;
+  }
+
+  &__action {
+    margin-top: $size-100;
+  }
+
+  @media screen and (min-width: $mq-md) {
+    margin-top: $size-400;
+  }
+}

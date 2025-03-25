@@ -6,16 +6,22 @@
     padding: $size-400;
     border-top-left-radius: $border-radius;
     border-top-right-radius: $border-radius;
+    border-bottom: 1px solid var(--border-color);
   }
 
   &__items {
     border-radius: $border-radius;
     background-color: var(--background-list);
+    box-shadow: var(--box-shadow);
+    -webkit-box-shadow: var(--box-shadow);
+    -moz-box-shadow: var(--box-shadow);
   }
   &__instructions {
     text-align: center;
     color: var(--button-text);
     font-size: $fs-sm-body;
-    margin-block: 2rem;
+    padding-block: $size-700;
+    background-color: var(--background-color);
+    border-radius: $border-radius;
   }
 }

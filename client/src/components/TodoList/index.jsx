@@ -1,39 +1,15 @@
 import "./index.scss";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
 import TodoFilter from "../TodoFilter";
 
-import {
-  useMutation,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
-import {
-  deleteTodo,
-  deleteTodos,
-  fetchTodos,
-  updateTodo,
-  updateTodos,
-} from "../../api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { deleteTodo, deleteTodos, updateTodo, updateTodos } from "../../api";
 import TodoListFooter from "../TodoListFooter";
 import TodoItem from "../TodoItem";
 
-// import ListSkeleton from "./ListSkeleton";
-
-export default function TodoList() {
-  const { isPending, isError, data, error } = useSuspenseQuery({
-    queryKey: ["todos"],
-    queryFn: fetchTodos,
-  });
-
-  const [todos, setTodos] = useState(data || []);
-
+export default function TodoList({ todos, onReorder, onMutation }) {
   const [filter, setFilter] = useState("All");
-
-  useEffect(() => {
-    setTodos(data || []);
-  }, [data]);
-
   const queryClient = useQueryClient();
 
   const updateTodoMutation = useMutation({
@@ -43,9 +19,10 @@ export default function TodoList() {
     onSuccess: () => {
       // updates the list
       queryClient.invalidateQueries(["todos"]);
+      onMutation({ message: "Status updated" });
     },
     onError: (error) => {
-      // todo
+      onMutation({ error });
     },
   });
 
@@ -54,16 +31,25 @@ export default function TodoList() {
       return deleteTodo(id);
     },
     onSuccess: () => {
+      // updates the list
       queryClient.invalidateQueries(["todos"]);
+      onMutation({ message: "Item deleted" });
+    },
+    onError: (error) => {
+      onMutation({ error });
     },
   });
 
   const reorderListMutation = useMutation({
-    mutationFn: (param) => {
-      return updateTodos(param);
+    mutationFn: ({ itemsToUpdate }) => {
+      return updateTodos(itemsToUpdate);
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["todos"]);
+    },
+    onError: (error, { oldTodos }) => {
+      onReorder(oldTodos); // go back to previous state
+      onMutation({ error });
     },
   });
 
@@ -72,7 +58,13 @@ export default function TodoList() {
       return deleteTodos(todosIds);
     },
     onSuccess: () => {
+      // updates the list
       queryClient.invalidateQueries(["todos"]);
+
+      onMutation({ message: "Deleted completed todos" });
+    },
+    onError: (error) => {
+      onMutation({ error });
     },
   });
 
@@ -134,16 +126,14 @@ export default function TodoList() {
       });
     }
 
-    setTodos(newItems);
-
-    reorderListMutation.mutate(itemsToUpdate);
+    onReorder(newItems);
+    reorderListMutation.mutate({ itemsToUpdate, oldTodos: todos });
   }
 
   function handleClearCompleted() {
     const idsToDelete = todos
       .filter((item) => item.completed)
       .map((item) => item._id);
-
     deleteTodosMutation.mutate(idsToDelete);
   }
 
@@ -157,7 +147,7 @@ export default function TodoList() {
               {...provided.props}
               ref={provided.innerRef}
             >
-              {!isPending && todos.length === 0 && (
+              {filteredList.length === 0 && (
                 <li className="todo-list__empty-message">
                   No items to display
                 </li>

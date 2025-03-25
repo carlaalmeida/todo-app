@@ -4,7 +4,7 @@ import { createTodo } from "../../api";
 import Input from "../TodoInput";
 import TodoCheckbox from "../TodoCheckbox";
 
-export default function CreateTodo() {
+export default function CreateTodo({ onCreate }) {
   const queryClient = useQueryClient();
 
   const createTodoMutatation = useMutation({
@@ -15,9 +15,10 @@ export default function CreateTodo() {
     onSuccess: () => {
       // updates the list
       queryClient.invalidateQueries(["todos"]);
+      onCreate({ message: "Created new todo" });
     },
     onError: (error) => {
-      // todo
+      onCreate({ error });
     },
   });
 

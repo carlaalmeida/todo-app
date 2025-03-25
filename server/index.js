@@ -1,4 +1,6 @@
 require("dotenv").config();
+const port = process.env.PORT || 5000;
+
 const express = require("express");
 const cors = require("cors");
 
@@ -80,8 +82,6 @@ app.patch("/todos", async (req, res) => {
 
   try {
     await Promise.all(updates);
-    // console.log("updated indexes");
-    // console.log(items);
     res.json(await Todo.findSorted({}));
   } catch (err) {
     console.error(err);
@@ -121,6 +121,12 @@ app.delete("/todos/:id", async (req, res) => {
 //deletes items with the ids specified in array [id1, id2, ...]
 app.delete("/todos/", async (req, res) => {
   const { ids: idsToDelete } = req.body;
+
+  if (idsToDelete.length === 0) {
+    res.json({});
+    return;
+  }
+
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
@@ -165,6 +171,6 @@ app.delete("/todos/", async (req, res) => {
   }
 });
 
-app.listen(5000, () => {
+app.listen(port, () => {
   console.log("Server is listening on port 5000.");
 });
