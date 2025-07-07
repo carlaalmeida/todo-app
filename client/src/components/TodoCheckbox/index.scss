@@ -36,6 +36,8 @@
       border: none;
       &::after {
         background-color: var(--background-list);
+        width: 90%;
+        height: 90%;
       }
     }
 
